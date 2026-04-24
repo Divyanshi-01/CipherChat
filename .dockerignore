@@ -1,0 +1,6 @@
+.git
+.idea
+logs
+**/target
+**/.idea
+node_modules
