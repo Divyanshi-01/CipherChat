@@ -6,7 +6,7 @@
 class WebSocketClient {
     constructor(config = {}) {
         this.config = {
-            wsUrl: config.wsUrl || 'http://localhost:8080/ws',
+           wsUrl: config.wsUrl || 'https://cipherchat-backend.onrender.com/ws',
             reconnectInterval: config.reconnectInterval || 5000,
             reconnectAttempts: config.reconnectAttempts || 10,
             ...config
