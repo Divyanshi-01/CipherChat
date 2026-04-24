@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: cipherchat-backend
+
+  server:
+    port: 8080
+
+  servlet:
+    context-path: /api
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+logging:
+  level:
+    root: INFO
+    com.p2p.messaging: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %logger{36} - %msg%n"

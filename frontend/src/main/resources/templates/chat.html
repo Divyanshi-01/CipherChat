@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">CipherChat</title>
+    <style>
+        :root {
+            --bg-deep: #2d3942;
+            --bg-main: #3b4953;
+            --panel: #f6f9fc;
+            --panel-edge: rgba(255, 255, 255, 0.24);
+            --text-main: #22313c;
+            --text-soft: #687b89;
+            --accent: #6f92b0;
+            --accent-strong: #587fa4;
+            --soft-surface: #dfeaf3;
+            --soft-pill: #e9f1f7;
+            --soft-border: #d4e0e8;
+            --message-own: #dfeaf3;
+            --message-other: #edf3f8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 20px;
+            font-family: "Segoe UI", sans-serif;
+            background:
+                radial-gradient(circle at top, rgba(140, 169, 192, 0.16), transparent 30%),
+                linear-gradient(135deg, var(--bg-deep), var(--bg-main));
+            color: var(--text-main);
+        }
+
+        .app {
+            height: calc(100vh - 40px);
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            background: rgba(246, 249, 252, 0.98);
+            border: 1px solid var(--panel-edge);
+            border-radius: 28px;
+            box-shadow: 0 28px 80px rgba(0, 0, 0, 0.22);
+            overflow: hidden;
+        }
+
+        .sidebar {
+            background: #f2f7fb;
+            border-right: 1px solid var(--soft-border);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand {
+            margin-bottom: 18px;
+        }
+
+        .brand h1 {
+            font-size: 30px;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 6px;
+        }
+
+        .brand p {
+            color: var(--text-soft);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .profile {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: white;
+            border: 1px solid var(--soft-border);
+            border-radius: 20px;
+            padding: 14px;
+            margin-bottom: 14px;
+        }
+
+        .avatar {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--accent-strong), var(--bg-main));
+            color: white;
+            font-size: 18px;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        .profile-name {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .profile-id {
+            color: var(--text-soft);
+            font-family: Consolas, monospace;
+            font-size: 12px;
+        }
+
+        .row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .row > * {
+            flex: 1;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 16px;
+            padding: 12px 14px;
+            font-size: 13px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+        }
+
+        .btn-dark {
+            background: var(--bg-main);
+            color: white;
+        }
+
+        .btn-light {
+            background: var(--soft-pill);
+            color: var(--text-main);
+        }
+
+        .section-title {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .section-subtitle {
+            color: var(--text-soft);
+            font-size: 13px;
+            line-height: 1.6;
+            margin-bottom: 14px;
+        }
+
+        .users-list {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .user-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: white;
+            border: 1px solid var(--soft-border);
+            border-radius: 18px;
+            padding: 14px;
+            margin-bottom: 12px;
+            cursor: pointer;
+        }
+
+        .user-card.active {
+            background: var(--soft-surface);
+        }
+
+        .user-card strong {
+            display: block;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .user-card span {
+            display: block;
+            color: var(--text-soft);
+            font-size: 11px;
+            font-family: Consolas, monospace;
+        }
+
+        .main {
+            padding: 20px;
+        }
+
+        .chat-box {
+            height: 100%;
+            background: white;
+            border: 1px solid var(--soft-border);
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--soft-border);
+            background: #f7fafc;
+        }
+
+        .chat-header-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .chat-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .chat-subtitle {
+            color: var(--text-soft);
+            font-size: 12px;
+            font-family: Consolas, monospace;
+        }
+
+        .pill {
+            background: var(--soft-pill);
+            color: var(--text-main);
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: linear-gradient(180deg, #fbfdff, #f4f8fb);
+        }
+
+        .empty-state {
+            margin: auto 0;
+            text-align: center;
+            color: var(--text-soft);
+            line-height: 1.7;
+        }
+
+        .message-row {
+            display: flex;
+        }
+
+        .message-row.own {
+            justify-content: flex-end;
+        }
+
+        .message-bubble {
+            max-width: 68%;
+            border-radius: 20px;
+            padding: 12px 14px;
+        }
+
+        .message-row.own .message-bubble {
+            background: var(--message-own);
+            border-bottom-right-radius: 8px;
+        }
+
+        .message-row:not(.own) .message-bubble {
+            background: var(--message-other);
+            border-bottom-left-radius: 8px;
+        }
+
+        .message-meta {
+            color: var(--text-soft);
+            font-size: 11px;
+            margin-bottom: 6px;
+        }
+
+        .composer {
+            display: flex;
+            gap: 12px;
+            padding: 18px 20px;
+            border-top: 1px solid var(--soft-border);
+        }
+
+        .composer input {
+            flex: 1;
+            border: 1px solid var(--soft-border);
+            border-radius: 18px;
+            padding: 14px 16px;
+            font-size: 14px;
+            font-family: inherit;
+            color: var(--text-main);
+            background: #f9fbfd;
+        }
+
+        .composer input:focus {
+            outline: none;
+            border-color: #b5cad9;
+        }
+
+        .send-btn {
+            min-width: 110px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+            color: white;
+            box-shadow: 0 14px 26px rgba(88, 127, 164, 0.24);
+        }
+
+        .toast {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            background: var(--bg-main);
+            color: white;
+            padding: 12px 14px;
+            border-radius: 14px;
+        }
+
+        @media (max-width: 920px) {
+            .app {
+                grid-template-columns: 1fr;
+            }
+
+            .users-list {
+                max-height: 260px;
+            }
+
+            .row {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <aside class="sidebar">
+        <div class="brand">
+            <h1>CipherChat</h1>
+            <p>Secure browser identity with encrypted messaging.</p>
+        </div>
+
+        <div class="profile">
+            <div class="avatar" id="currentAvatar">CC</div>
+            <div>
+                <div class="profile-name" id="currentName">Loading...</div>
+                <div class="profile-id" id="currentIdentity">Loading...</div>
+            </div>
+        </div>
+
+        <div class="row">
+            <button class="btn btn-dark" onclick="copyBackup()">Recovery Key</button>
+            <button class="btn btn-light" onclick="logout()">Logout</button>
+        </div>
+
+        <div class="section-title">People Ready To Chat</div>
+        <div class="section-subtitle">Display names first, short fingerprint second.</div>
+
+        <div class="users-list" id="usersList">
+            <div class="empty-state">Loading active identities...</div>
+        </div>
+    </aside>
+
+    <main class="main">
+        <div class="chat-box">
+            <div class="chat-header">
+                <div class="chat-header-left">
+                    <div class="avatar" id="chatAvatar">--</div>
+                    <div>
+                        <div class="chat-title" id="chatTitle">Select a person</div>
+                        <div class="chat-subtitle" id="chatStatus">Choose someone from the list to start chatting.</div>
+                    </div>
+                </div>
+                <div class="pill">Encrypted</div>
+            </div>
+
+            <div class="messages" id="messagesContainer">
+                <div class="empty-state">
+                    Welcome to CipherChat. Messages are encrypted in the browser before they are sent.
+                </div>
+            </div>
+
+            <div class="composer">
+                <input id="messageInput" type="text" placeholder="Write a private message..." disabled>
+                <button class="btn send-btn" id="sendBtn" onclick="sendMessage()" disabled>Send</button>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="/js/key-store.js"></script>
+<script src="/js/key-manager.js"></script>
+<script src="/js/e2ee.js"></script>
+<script>
+    const API_URL = 'http://localhost:8080/api';
+
+    let sessionToken = null;
+    let currentUserId = null;
+    let currentDisplayName = null;
+    let identity = null;
+    let selectedUser = null;
+    let availableUsers = [];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        await bootstrap();
+    });
+
+    async function bootstrap() {
+        sessionToken = localStorage.getItem('sessionToken');
+        currentUserId = localStorage.getItem('userId');
+        currentDisplayName = localStorage.getItem('displayName');
+
+        if (!sessionToken || !currentUserId) {
+            window.location.href = '/login';
+            return;
+        }
+
+        const identityRecord = await KeyStore.loadIdentity();
+        if (!identityRecord || identityRecord.userId !== currentUserId) {
+            localStorage.clear();
+            window.location.href = '/login';
+            return;
+        }
+
+        identity = await KeyManager.materializeIdentity(identityRecord);
+
+        const validation = await fetch(`${API_URL}/auth/validate?token=${sessionToken}`);
+        const validationData = await validation.json();
+        if (!validationData.success) {
+            localStorage.clear();
+            window.location.href = '/login';
+            return;
+        }
+
+        currentUserId = validationData.userId;
+        currentDisplayName = validationData.displayName || currentDisplayName || displayNameFromUserId(currentUserId);
+        document.getElementById('currentName').textContent = currentDisplayName;
+        document.getElementById('currentIdentity').textContent = shortFingerprint(currentUserId);
+        document.getElementById('currentAvatar').textContent = initialsFromName(currentDisplayName);
+        localStorage.setItem('publicKey', validationData.publicKey || identity.publicKey);
+        localStorage.setItem('displayName', currentDisplayName);
+
+        setupEventListeners();
+        await loadUsers();
+        setInterval(loadUsers, 5000);
+        setInterval(async () => {
+            if (selectedUser) {
+                await loadConversation(selectedUser.userId);
+            }
+        }, 2000);
+    }
+
+    function setupEventListeners() {
+        document.getElementById('messageInput').addEventListener('keypress', async (event) => {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                await sendMessage();
+            }
+        });
+    }
+
+    async function loadUsers() {
+        try {
+            const response = await fetch(`${API_URL}/auth/users?token=${sessionToken}`);
+            const data = await response.json();
+
+            if (!data.success || !Array.isArray(data.users)) {
+                throw new Error(data.message || 'Unable to load active users.');
+            }
+
+            availableUsers = data.users
+                .filter((user) => user.userId !== currentUserId)
+                .map((user) => ({
+                    userId: user.userId,
+                    displayName: user.displayName || displayNameFromUserId(user.userId),
+                    publicKey: user.publicKey
+                }));
+
+            for (const user of availableUsers) {
+                await KeyStore.saveContact(user);
+            }
+
+            if (selectedUser) {
+                const refreshed = availableUsers.find((user) => user.userId === selectedUser.userId);
+                if (refreshed) {
+                    selectedUser = refreshed;
+                }
+            }
+
+            renderUsers();
+        } catch (error) {
+            document.getElementById('usersList').innerHTML = `<div class="empty-state">${error.message || 'Unable to load active users.'}</div>`;
+        }
+    }
+
+    function renderUsers() {
+        const list = document.getElementById('usersList');
+
+        if (availableUsers.length === 0) {
+            list.innerHTML = '<div class="empty-state">No other active identities are connected right now.</div>';
+            return;
+        }
+
+        list.innerHTML = '';
+        availableUsers.forEach((user) => {
+            const card = document.createElement('div');
+            card.className = `user-card ${selectedUser && selectedUser.userId === user.userId ? 'active' : ''}`;
+            card.onclick = async () => {
+                selectedUser = user;
+                renderUsers();
+                document.getElementById('chatTitle').textContent = user.displayName;
+                document.getElementById('chatStatus').textContent = shortFingerprint(user.userId);
+                document.getElementById('chatAvatar').textContent = initialsFromName(user.displayName);
+                document.getElementById('messageInput').disabled = false;
+                document.getElementById('sendBtn').disabled = false;
+                document.getElementById('messageInput').focus();
+                await loadConversation(user.userId);
+            };
+
+            card.innerHTML = `
+                <div class="avatar">${escapeHtml(initialsFromName(user.displayName))}</div>
+                <div>
+                    <strong>${escapeHtml(user.displayName)}</strong>
+                    <span>${shortFingerprint(user.userId)}</span>
+                </div>
+            `;
+            list.appendChild(card);
+        });
+    }
+
+    async function loadConversation(otherUserId) {
+        try {
+            const response = await fetch(`${API_URL}/messages/conversation/${otherUserId}?token=${sessionToken}`);
+            const data = await response.json();
+
+            if (!data.success || !Array.isArray(data.messages)) {
+                throw new Error(data.message || 'Unable to load ciphertext messages.');
+            }
+
+            const contact = selectedUser && selectedUser.userId === otherUserId
+                ? selectedUser
+                : await KeyStore.loadContact(otherUserId);
+
+            await displayMessages(E2EE.dedupeMessages(data.messages), contact);
+        } catch (error) {
+            document.getElementById('messagesContainer').innerHTML =
+                `<div class="empty-state">${error.message || 'Unable to load messages.'}</div>`;
+        }
+    }
+
+    async function displayMessages(messages, contact) {
+        const container = document.getElementById('messagesContainer');
+        container.innerHTML = '';
+
+        if (messages.length === 0) {
+            container.innerHTML = '<div class="empty-state">No messages yet. Start the conversation with something simple.</div>';
+            return;
+        }
+
+        for (const message of messages) {
+            const row = document.createElement('div');
+            const own = message.from === currentUserId;
+            row.className = `message-row ${own ? 'own' : ''}`;
+
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble';
+
+            const meta = document.createElement('div');
+            meta.className = 'message-meta';
+            meta.textContent = `${labelForMessage(message)} | ${new Date(Number(message.timestamp)).toLocaleTimeString()}`;
+
+            const content = document.createElement('div');
+            try {
+                content.textContent = await E2EE.decryptMessage(identity, message, contact ? contact.publicKey : null);
+            } catch (error) {
+                content.textContent = '[Unable to decrypt message]';
+            }
+
+            bubble.appendChild(meta);
+            bubble.appendChild(content);
+            row.appendChild(bubble);
+            container.appendChild(row);
+        }
+
+        container.scrollTop = container.scrollHeight;
+    }
+
+    async function sendMessage() {
+        const input = document.getElementById('messageInput');
+        const text = input.value.trim();
+
+        if (!text || !selectedUser) {
+            return;
+        }
+
+        document.getElementById('sendBtn').disabled = true;
+
+        try {
+            const encrypted = await E2EE.encryptMessage(identity, selectedUser, text);
+            const response = await fetch(`${API_URL}/messages/send`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': sessionToken
+                },
+                body: JSON.stringify({
+                    to: selectedUser.userId,
+                    ciphertext: encrypted.ciphertext,
+                    nonce: encrypted.nonce,
+                    messageId: encrypted.messageId,
+                    timestamp: String(encrypted.timestamp),
+                    keyVersion: String(encrypted.keyVersion),
+                    senderPublicKey: encrypted.senderPublicKey
+                })
+            });
+
+            const data = await response.json();
+            if (!data.success) {
+                throw new Error(data.message || 'Failed to send encrypted message.');
+            }
+
+            input.value = '';
+            await loadConversation(selectedUser.userId);
+        } catch (error) {
+            showToast(error.message || 'Failed to send message.');
+        } finally {
+            document.getElementById('sendBtn').disabled = false;
+        }
+    }
+
+    async function copyBackup() {
+        try {
+            const record = await KeyStore.loadIdentity();
+            if (!record) {
+                throw new Error('No local identity found.');
+            }
+
+            await navigator.clipboard.writeText(KeyManager.exportPrivateKey(record.privateJwk));
+            showToast('Recovery key copied to clipboard.');
+        } catch (error) {
+            showToast(error.message || 'Unable to copy recovery key.');
+        }
+    }
+
+    async function logout() {
+        try {
+            await fetch(`${API_URL}/auth/logout?token=${sessionToken}`, {
+                method: 'POST'
+            });
+        } catch (error) {
+            console.error(error);
+        }
+
+        localStorage.removeItem('sessionToken');
+        localStorage.removeItem('userId');
+        localStorage.removeItem('displayName');
+        localStorage.removeItem('publicKey');
+        window.location.href = '/login';
+    }
+
+    function showToast(message) {
+        const existing = document.querySelector('.toast');
+        if (existing) {
+            existing.remove();
+        }
+
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2500);
+    }
+
+    function shortFingerprint(userId) {
+        return `${userId.slice(0, 6)}...${userId.slice(-4)}`;
+    }
+
+    function displayNameFromUserId(userId) {
+        return `Cipher ${userId.slice(0, 6)}`;
+    }
+
+    function initialsFromName(name) {
+        return name
+            .split(' ')
+            .filter(Boolean)
+            .slice(0, 2)
+            .map((part) => part[0].toUpperCase())
+            .join('') || 'CC';
+    }
+
+    function labelForMessage(message) {
+        if (message.from === currentUserId) {
+            return currentDisplayName || displayNameFromUserId(currentUserId);
+        }
+
+        if (selectedUser && selectedUser.userId === message.from) {
+            return selectedUser.displayName;
+        }
+
+        return displayNameFromUserId(message.from);
+    }
+
+    function escapeHtml(value) {
+        return value
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#39;');
+    }
+</script>
+</body>
+</html>

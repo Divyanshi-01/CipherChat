@@ -1,0 +1,43 @@
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Maven
+target/
+*.class
+*.jar
+*.war
+*.zip
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+
+# Logs
+logs/
+*.log
+
+# Database
+*.db
+*.sqlite
+*.h2.db
+
+# Build
+build/
+dist/
+
+# IDE config
+*.iml
+.classpath
+.project
+.settings/
+
+# Environment
+.env
+*.properties.local
