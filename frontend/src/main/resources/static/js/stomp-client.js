@@ -7,7 +7,7 @@
 class StompClient {
     constructor(config = {}) {
         this.config = {
-            wsUrl: config.wsUrl || 'ws://localhost:8080/ws',
+            wsUrl: config.wsUrl || 'wss://cipherchat-backend.onrender.com/ws',
             debug: config.debug || false,
             reconnect: config.reconnect !== false,
             reconnectInterval: config.reconnectInterval || 5000,
