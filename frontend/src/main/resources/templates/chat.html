@@ -400,8 +400,9 @@
 <script src="/js/key-store.js"></script>
 <script src="/js/key-manager.js"></script>
 <script src="/js/e2ee.js"></script>
-<script>
-    const API_URL = 'http://localhost:8080/api';
+<script th:inline="javascript">
+    const API_URL = /*[[${apiUrl}]]*/ 'http://localhost:8080/api';
+    const WS_URL = /*[[${wsUrl}]]*/ 'ws://localhost:8080/ws';
 
     let sessionToken = null;
     let currentUserId = null;

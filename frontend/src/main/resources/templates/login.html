@@ -387,8 +387,9 @@
 
 <script src="/js/key-store.js"></script>
 <script src="/js/key-manager.js"></script>
-<script>
-    const API_URL = 'https://cipherchat-backend.onrender.com/api';
+<script th:inline="javascript">
+    const API_URL = /*[[${apiUrl}]]*/ 'http://localhost:8080/api';
+
     let savedIdentityRecord = null;
     let pendingIdentityRecord = null;
     let currentSuggestedAlias = '';
